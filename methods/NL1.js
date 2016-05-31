@@ -15,7 +15,7 @@ class NL1 {
 
   getGradient(x) {
     return math.multiply(
-      math.multiply(this.a, math.transpose(this.a)),
+      math.multiply(math.transpose(this.a), this.a),
       x
     )
   }
@@ -125,14 +125,14 @@ class NL1 {
 
   nl1() {
     let xNext = this.startPoint;
-    let iteration = 0;
+    let iterations = 0;
     let iterationSolutions = [];
     let xPrev = this.startPoint;
     let hPrev = null;
     
     do {
       iterationSolutions.push(xPrev);
-      iteration++;
+      iterations++;
 
       xPrev = xNext;
       hPrev = this.calcH(xPrev, hPrev);
@@ -142,7 +142,7 @@ class NL1 {
     return {
       solution: xNext,
       iterationSolutions: iterationSolutions,
-      iteration: iteration
+      iterations: iterations
     }
   }
 }
