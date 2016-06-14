@@ -1,4 +1,3 @@
-'use strict';
 class BinarySearchTree {
   constructor(arr) {
     arr = arr || [];

@@ -1,7 +1,6 @@
-'use strict';
-
 const math = require('mathjs');
 const BinarySearchTree = require('../src/binarySearchTree');
+const stochasticMatrix = require('../src/stochasticMatrix');
 
 class FW {
   constructor(a, startPoint, eps) {
@@ -9,9 +8,9 @@ class FW {
     this.startPoint = startPoint;
     this.eps = eps;
 
-    this.n = startPoint.length;
+    this.n = startPoint.size()[0];
     this.prevGradient = this.getGradient(startPoint);
-    this.prevY = new Array(this.n);
+    this.prevY = math.matrix(new Array(this.n).fill(0), 'sparse');
   }
 
   getGradient(x) {
@@ -24,9 +23,10 @@ class FW {
   findArgMinI(z) {
     this.prevGradient = z;
     let tree = new BinarySearchTree();
+    
     z.forEach((item, index) => {
-      tree.add(item, index[0]);
-    });
+      tree.add(item, index);
+    }, true);
 
     const min = tree.findMin();
 
@@ -39,7 +39,7 @@ class FW {
   }
   
   beta(k) {
-    if (k == 2) return 1/3;
+    if (k == 2) return 1/2;
 
     let betaResult = 1;
     for (let r = 2; r <= k - 1; r++) {
@@ -54,27 +54,23 @@ class FW {
   }
 
   y(position) {
-    this.prevY = new Array(this.n).fill(0);
-    this.prevY[position] = 1;
+    this.prevY =  math.matrix(new Array(this.n).fill(0), 'sparse');
+    this.prevY.set(position, 1);
   }
 
   calcNormVector(x) {
     let sum = 0;
-    x.forEach((value) => { sum += Math.pow(Math.abs(value), 2)} );
+    x.forEach((value) => { sum += Math.pow(value, 2)} );
 
     return Math.sqrt(sum);
 
   }
 
-  stopCondition(zNext, zPrev) {
+  stopCondition(zNext) {
 
-    return 0.5 * Math.pow(
-        this.calcNormVector(
-          math.subtract(
-            math.multiply(this.a, zNext),
-            math.multiply(this.a, zPrev)
-          )),
-        2) >= Math.pow(this.eps, 2) * 0.5
+    return this.calcNormVector(
+            math.multiply(this.a, zNext)
+        ) >= this.eps;
   }
 
   fw() {
@@ -82,14 +78,16 @@ class FW {
     let zNext = this.startPoint;
     let k = 1;
     let iterationSolutions = [];
-    console.log(this.getGradient(this.startPoint));
     this.y(
       this.findArgMinI(this.getGradient(this.startPoint))
     );
-    let currentGamma = 1;
-
+    let currentGamma;
+    let epss = [this.stopCondition(zPrev)];
+    let times = [0];
+    const now = new Date;
+    
     do{
-      iterationSolutions.push(zPrev);
+      // iterationSolutions.push(zPrev);
       currentGamma = this.gammaModification(k);
       zPrev = zNext;
       zNext = math.add(zPrev, math.multiply(currentGamma, this.prevY));
@@ -99,16 +97,21 @@ class FW {
       );
 
       k++;
-      console.log(zPrev, zNext, this.prevY);
-    }while(this.stopCondition(zNext, zPrev));
+      if (new Date - now < 100) {
+        epss.push(this.calcNormVector(
+          math.multiply(this.a, math.multiply(zNext, this.beta(k)))
+        ));
+        times.push(new Date - now);
+      }
+    }while(new Date - now < 100)
 
     return {
       solution: math.multiply(zNext, this.beta(k)),
-      iterationSolutions: iterationSolutions,
-      iterations: k
+      // iterationSolutions: iterationSolutions,
+      iterations: k,
+      epss: epss,
+      times: times
     }
   }
 }
-
-
 module.exports = FW;

@@ -1,0 +1,56 @@
+/***/
+body, h1, dl, dt, dd {
+    margin: 0;
+}
+
+a, fieldset, button, figure {
+    all: unset;
+}
+
+fieldset{
+    display: block;
+}
+/***/
+
+body{
+    max-width: 940px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #000000;
+}
+h1 {
+    color: #f8fcf8;
+}
+
+.draw-graph{
+    display: flex;
+    align-content: space-between;
+}
+#graph{
+    width:80%;
+    height: 80%;
+    border: 1px solid;
+}
+
+.graphMethods{
+    max-height: 500px;
+    margin-bottom: 20px;
+}
+.ct-grid {
+    stroke: #BDBDBD;
+}
+
+.ct-label{
+    color: #FAFAFA;
+}
+
+.ct-line {
+    /* Control the thikness of your lines */
+    stroke-width: 2px;
+}
+
+.ct-point {
+    stroke-width: 5px;
+}
